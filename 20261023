@@ -1,0 +1,175 @@
+####部署sg prod 
+https://moonton.feishu.cn/wiki/Z98cwTpF2i3zmOkkPelcsb5EnoP
+整个过程，产品需要关注海外发版部署过程。
+1. 本次发布必须先后端、再前端
+2. 发布过程中可能会出现的问题
+   1. 某些页面的某些图标会出现：index length之类越界错误 （约定5分钟内定位问题并移除多余配置）
+   2. 其他未能预知的问题。产品判断需要回滚
+
+回滚整个过程大概最大预估2分钟。
+
+####部署
+1. 服务部署
+2. 服务可用测试
+
+####留存性能
+    gen_ds_col.py -doc FPKas8JV0hpuzytvFgBcUA4tn6b -sheet fA6ebJ -env dev 
+curl --location 'https://ba-service-volc.bi.moontontech.net/charts/data/query' \
+--header 'X-Moa-Token: b7xo/Z540CNr6yyg8KWfWPvEwooXbhYqmJ1bJ20p/YcC4sT6lQ==' \
+--header 'Content-Type: application/json' \
+--data '{
+    "projectId": "1001",
+    "dataSetId": "300539",
+    "chartType": "indicator",
+    "rows": [],
+    "columns": [],
+    "measures": [
+        {
+            "col": "sum(pay_amt)/count(distinct logymd)",
+            "alias": "num",
+            "function": "",
+            "compareCalc": {
+                "type": "compare",
+                "resultData": "percent",
+                "field": "logymd",
+                "formatter": 2,
+                "custom": null
+            }
+        }
+    ],
+    "filters": [
+        {
+            "col": "logymd",
+            "operator": "compare",
+            "comOperator": "between",
+            "values": [
+                [
+                    "2026-08-27",
+                    "2026-10-21"
+                ],
+                [
+                    "2026-07-02",
+                    "2026-08-26"
+                ]
+            ]
+        },
+        {
+            "col": "appname",
+            "operator": "=",
+            "values": [
+                "mlbb"
+            ]
+        },
+        {
+            "col": "granularity_type",
+            "operator": "=",
+            "values": [
+                "account"
+            ]
+        },
+        {
+            "col": "date_type",
+            "operator": "=",
+            "values": [
+                "daily"
+            ]
+        },
+        {
+            "col": "definition_type",
+            "operator": "=",
+            "values": [
+                "0"
+            ]
+        },
+        {
+            "col": "region",
+            "operator": "in",
+            "values": [
+                "东南亚成熟四国",
+                "柬新地区",
+                "印越地区",
+                "俄土地区",
+                "金三角地区",
+                "CIS地区(除RU外)",
+                "拉美攻坚地区",
+                "其他地区"
+            ]
+        }
+    ],
+    "senior": {
+        "preFormat": "mlbb_overview_datasetid_replace_formatter"
+    },
+    "chartId": "db_in_payamt",
+    "panelId": "ml_db_db_in_payamt"
+}'
+
+msyql -hmysql3a6e112732d9.rds.ivolces.com -udecismart -p 
+
+time curl --location 'http://ba-service-volc.dev.bi.moontontech.net/charts/data/query?dataSetId=300199' \
+--header 'X-Moa-Token: FavDMOZTtAit0WUNdqNYAS0awYA1c2t10lNjnGU/PbwCyuygdA==' \
+--header 'Content-Type: application/json' \
+--data '{
+  "projectId": "1001",
+  "dataSetId": "300199",
+  "chartType": "config",
+  "rows": [],
+  "columns": [],
+  "measures": [
+    {
+      "col": "config_type",
+      "alias": "config_type",
+      "function": "parentheses"
+    },
+    {
+      "col": "config_id",
+      "alias": "config_id",
+      "function": "parentheses"
+    },
+    {
+      "col": "config_name",
+      "alias": "config_name",
+      "function": "parentheses"
+    },
+    {
+      "col": "config_order",
+      "alias": "config_order",
+      "function": "parentheses"
+    },
+    {
+      "col": "parent_config_type",
+      "alias": "parent_config_type",
+      "function": "parentheses"
+    },
+    {
+      "col": "parent_config_id",
+      "alias": "parent_config_id",
+      "function": "parentheses"
+    }
+  ],
+  "filters": [
+    {
+      "col": "appname",
+      "operator": "=",
+      "values": [
+        "mlbb"
+      ]
+    },
+    {
+      "col": "config_type",
+      "operator": "in",
+      "values": [
+        "cube_zone_type",
+        "cube_zone_group",
+        "cube_zoneid",
+        "cube_network_group",
+        "cube_media_source",
+        "cube_network_id"
+      ]
+    }
+  ],
+  "senior": {
+    "format": "zone_hierarchy_rowlevel_permission"
+  },
+  "page": "user_overview",
+  "panelId": "user_overview_cube_tree_config"
+}'
